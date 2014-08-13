@@ -23,10 +23,12 @@ int iterations; // the number of pixels in the radius to search
 int totalCalculations = 0; // the total number of calculations needed to complete the analysis
 int calculationsCompleted = 0; // the total number of calculations completed so far
 
-int contrastLevel; // the contrast ratio level to check for (passed from the
+double contrastLevel; // the contrast ratio level to check for (passed from the
 
 
-int evaluateColorContrast(double r1, double g1, double b1, double r2, double g2, double b2) {
+
+
+int evaluateColorContrast(int r1, int g1, int b1, int r2, int g2, int b2) {
 	// This function is an optimized version of the algorithm found at
 	// https://github.com/gdkraus/wcag2-color-contrast
 	// It is optimized to reduce function calls. This is for speed performance
@@ -34,12 +36,12 @@ int evaluateColorContrast(double r1, double g1, double b1, double r2, double g2,
 	// be written more cleanly, but the overhead of the function calls adds significantly
 	// to the processing time.
 
-	float ratio;
+	double ratio;
 	double l1; //luminosity of color 1
 	double r, g, b;
-	r = r1 / 255;
-	g = g1 / 255;
-	b = b1 / 255;
+	r = r1 / 255.0;
+	g = g1 / 255.0;
+	b = b1 / 255.0;
 	if (r <= 0.03928) {
 		r = r / 12.92;
 	} else {
@@ -60,10 +62,10 @@ int evaluateColorContrast(double r1, double g1, double b1, double r2, double g2,
 
 	l1 = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
-	int l2; //luminosity of color 2
-	r = r2 / 255;
-	g = g2 / 255;
-	b = b2 / 255;
+	double l2; //luminosity of color 2
+	r = r2 / 255.0;
+	g = g2 / 255.0;
+	b = b2 / 255.0;
 	if (r <= 0.03928) {
 		r = r / 12.92;
 	} else {
@@ -90,14 +92,14 @@ int evaluateColorContrast(double r1, double g1, double b1, double r2, double g2,
 		ratio = ((l2 + 0.05) / (l1 + 0.05));
 	}
 
-	if (round(ratio*10)/10 >= contrastLevel) {
+	if (round(ratio*10)/10.0 >= contrastLevel) {
 		return 1; // two colors have enough contrast
 	} else {
 		return 0; // two colors do not have enough contrast
 	}
 }
 
-void iterativeAnalyze(radius) {
+void iterativeAnalyze(int radius) {
 	int x = 0; // the counter in the width dimension
 	int y = 0; // the counter in the height dimension
 	int xMax = w; // the maximum width to check for, when iterating
@@ -110,47 +112,12 @@ void iterativeAnalyze(radius) {
 
 	/////
 	// check if any contrast borders already exist in the image processed so far for a given radius around a pixel
-	printf("String length: %d\n",w*h);
+	//printf("String length: %d\n",w*h);
 	for (i2 = 0, n2 = w*h; i2 < n2; i2 += 1) {
-		//printf("i2: %d n2:%d\n",i2,n2);
 
-		//foundContrastBorder = 0;
-
-		/*for (j2 = 0; j2 <= radius; j2 += 1) {
-			if(foundContrastBorder){
-				break; // stop checking if a border is found
-			}
-			for (k2 = 0; k2 <= radius; k2 += 1) {
-				if(foundContrastBorder){
-					break; // stop checking if a border is found
-				}
-
-				// check to see if a contrast border had been found on a previous iteration
-				//
-				// + + direction
-				if (imageCheck[i2 + (w * j2) + (k2)] > 0) {
-					foundContrastBorder = 1;
-				}
-				// + - direction
-				if (imageCheck[i2 + (w * j2) - (k2)] > 0) {
-					foundContrastBorder = 1;
-				}
-				// - + direction
-				if (imageCheck[i2 - (w * j2) + (k2)] > 0) {
-					foundContrastBorder = 1;
-				}
-				// - - direction
-				if (imageCheck[i2 - (w * j2) - (k2)] > 0) {
-					foundContrastBorder = 1;
-				}
-			}
-		}*/
-		printf("Inside foundContrastBorder\n");
 		success = 0;
-		//failure = 0;
 		int j,k;
 
-		//	if (!foundContrastBorder) {
 
 
 		for ( j = 0; j <= radius; j += 1) {
@@ -162,14 +129,14 @@ void iterativeAnalyze(radius) {
 					int basePixelRed = pix[i2 * 4];
 					int basePixelGreen = pix[i2 * 4 + 1];
 					int basePixelBlue = pix[i2 * 4 + 2];
-					printf("Blue pixel: %d\n",basePixelBlue);
+					//printf("Blue pixel: %d\n",basePixelBlue);
 					int temp =i2 * 4 + (w * j * 4) + (k * 4) + 2;
 
 					// + + direction
 					if(temp < w*h*4)
 					{
 						if (evaluateColorContrast(basePixelRed, basePixelGreen, basePixelBlue, pix[i2 * 4 + (w * j * 4) + (k * 4)], pix[i2 * 4 + (w * j * 4) + (k * 4) + 1], pix[i2 * 4 + (w * j * 4) + (k * 4) + 2])) {
-							printf("Inside Success\n");
+							//printf("Inside Success\n");
 							success = +1;
 						}
 					}//else {
@@ -181,7 +148,7 @@ void iterativeAnalyze(radius) {
 					if(temp < w*h*4)
 					{
 						if (evaluateColorContrast(basePixelRed, basePixelGreen, basePixelBlue, pix[i2 * 4 + (w * j * 4) - (k * 4)], pix[i2 * 4 + (w * j * 4) - (k * 4) + 1], pix[i2 * 4 + (w * j * 4) - (k * 4) + 2])) {
-							printf("Inside Success\n");
+							//printf("Inside Success\n");
 							success = +1;
 						}
 					}//else {
@@ -189,13 +156,13 @@ void iterativeAnalyze(radius) {
 					//}
 
 					temp =i2 * 4 - (w * j * 4) + (k * 4);
-					printf("Blue pixel2: %d\n",temp);
+					//printf("Blue pixel2: %d\n",temp);
 					// - + direction
 					if(temp > 0)
 					{
-						printf("inside if\n");
+						//printf("inside if\n");
 						if (evaluateColorContrast(basePixelRed, basePixelGreen, basePixelBlue, pix[i2 * 4 - (w * j * 4) + (k * 4)], pix[i2 * 4 - (w * j * 4) + (k * 4) + 1], pix[i2 * 4 - (w * j * 4) + (k * 4) + 2])) {
-							printf("Inside Success\n");
+							//printf("Inside Success\n");
 							success = +1;
 						}
 					}//else {
@@ -207,7 +174,7 @@ void iterativeAnalyze(radius) {
 					if(temp >0)
 					{
 						if (evaluateColorContrast(basePixelRed, basePixelGreen, basePixelBlue, pix[i2 * 4 - (w * j * 4) - (k * 4)], pix[i2 * 4 - (w * j * 4) - (k * 4) + 1], pix[i2 * 4 - (w * j * 4) - (k * 4) + 2])) {
-							printf("Inside Success\n");
+							//printf("Inside Success\n");
 							success = +1;
 						}
 					}//else {
@@ -217,9 +184,6 @@ void iterativeAnalyze(radius) {
 					if(success > 0){
 						break; // if a border if found, stop
 					}
-					if(success > 0){
-						break;
-					}
 				}
 			}
 		}
@@ -228,16 +192,18 @@ void iterativeAnalyze(radius) {
 		if (image[y * w + x] == 0 || radius == 1) {
 			if (success > 0) {
 				if (radius == 1) {
-					printf("Assigned white\n");
+					//printf("Assigned white : x:%d  y:%d\n",x,y);
 					image[y * w + x] = 255; // white
 				} else if (radius == 2) {
+					//printf("Assigned ,light gray\n");
 					image[y * w + x] = 170; // light gray
 				} else if (radius == 3) {
+					//printf("Assigned medium gray\n");
 					image[y * w + x] = 85; // medium gray
 				}
 
 			} else {
-				printf("Assigned black\n");
+				//printf("Assigned black\n");
 				image[y * w + x] = 0; // black
 
 			}
@@ -250,7 +216,7 @@ void iterativeAnalyze(radius) {
 			x = 0; // reset the counter in the width dimension
 			y += 1; // in crement the counter in the height dimension
 		}
-		printf("iteration\n");
+		//printf("iteration\n");
 
 	}
 	//int i,j;
@@ -285,18 +251,29 @@ void encodeOneStep(const char* filename)
 	/*Encode the image*/
 	int m,n,pixelData,pixelLocation;
 	unsigned char *data  = malloc(w*h*4);
-	for (m = 0; m < h; m += 1) {
+	/*for (m = 0; m < h; m += 1) {
 		for (n = 0; n < w; n += 1) {
 			pixelData = image[m * (w) + n];
 			pixelLocation = (m * (w) + n)*4;
-			data[pixelLocation + 0] = pixelData;
-			data[pixelLocation + 1] = pixelData;
-			data[pixelLocation + 2] = pixelData;
-			data[pixelLocation + 3] = 192; //opacity of 75%
-		}
+								data[pixelLocation + 0] = pixelData;
+								data[pixelLocation + 1] = pixelData;
+								data[pixelLocation + 2] = pixelData;
+								data[pixelLocation + 3] = 255; //opacity of 75% 192
+
+	}
+	unsigned error = lodepng_encode32_file(filename, data, w, h);*/
+	//unsigned error = lodepng_encode32_file(filename, image, w, h);
+
+	for (m = 0, n = w*h; m < n; m += 1) {
+					//pixelLocation = (m * (w) + n)*4;
+			pixelData = image[m];
+			data[m * 4 + 0] = pixelData;
+			data[m * 4 + 1] = pixelData;
+			data[m * 4 + 2] = pixelData;
+			data[m * 4 + 3] = 255; //opacity of 75% 192
+
 	}
 	unsigned error = lodepng_encode32_file(filename, data, w, h);
-
 	/*if there's an error, display it*/
 	if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
 	printf("Finished encoding image\n");
@@ -304,17 +281,20 @@ void encodeOneStep(const char* filename)
 
 int main(int argc,char *argv[])
 {
-	if(argc < 3)
+	if(argc < 4)
 	{
 		printf("Enter correct number of parameters\n");
+		printf("[input filename] [radius] [contrast level] [output filename] ");
 		return 0;
 
 	}
-	char *filename = argv[1];
+	char *input_filename = argv[1];
 	iterations = atoi(argv[2]);
-	contrastLevel =atoi(argv[3]);
-	decodeImage(filename);
-	encodeOneStep("test1.png");
+	contrastLevel =atof(argv[3]);
+	char *output_filename = argv[4];
+	//printf("%f\n",contrastLevel);
+	decodeImage(input_filename);
+	encodeOneStep(output_filename);
 	return 0;
 
 
