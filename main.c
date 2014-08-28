@@ -14,6 +14,10 @@
 
 unsigned w; // width of the image
 unsigned h; // height of the image
+unsigned new_width;
+unsigned new_height;
+unsigned new_x;
+unsigned new_y;
 unsigned char* image; // the resulting image, as a set of white or gray pixels on a black background
 unsigned char* imageCheck; // a copy of the results after an interation, used to check if all calcualtions are needed in the next iteration
 unsigned char* imageBuffer;
@@ -261,10 +265,12 @@ void encodeOneStep(const char* filename)
 								data[pixelLocation + 3] = 255; //opacity of 75% 192
 
 	}
-	unsigned error = lodepng_encode32_file(filename, data, w, h);*/
+	}
+	unsigned error = lodepng_encode32_file(filename, data, w, h);
+	*/
 	//unsigned error = lodepng_encode32_file(filename, image, w, h);
 
-	for (m = 0, n = w*h; m < n; m += 1) {
+	/*for (m = 0, n = w*h; m < n; m += 1) {
 					//pixelLocation = (m * (w) + n)*4;
 			pixelData = image[m];
 			data[m * 4 + 0] = pixelData;
@@ -272,10 +278,26 @@ void encodeOneStep(const char* filename)
 			data[m * 4 + 2] = pixelData;
 			data[m * 4 + 3] = 255; //opacity of 75% 192
 
-	}
-	unsigned error = lodepng_encode32_file(filename, data, w, h);
+	}*/
+	//unsigned error = lodepng_encode32_file(filename, data, w, h);
 	/*if there's an error, display it*/
-	if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
+	int i,j;
+
+	for (m = new_x,i=0; (m-new_x) < new_height && m<h; m += 1,i++) {
+			for (n = new_y,j=0; (n-new_y) < new_width && n<w; n += 1,j++) {
+				pixelData = image[m * (w) + n];
+				pixelLocation = (i * (new_width) + j)*4;
+									data[pixelLocation + 0] = pixelData;
+									data[pixelLocation + 1] = pixelData;
+									data[pixelLocation + 2] = pixelData;
+									data[pixelLocation + 3] = 255; //opacity of 75% 192
+
+		}
+		}
+
+	unsigned error = lodepng_encode32_file(filename, data, new_width, new_height);
+
+		if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
 	printf("Finished encoding image\n");
 }
 
@@ -284,7 +306,7 @@ int main(int argc,char *argv[])
 	if(argc < 4)
 	{
 		printf("Enter correct number of parameters\n");
-		printf("[input filename] [radius] [contrast level] [output filename] ");
+		printf("[input filename] [radius] [contrast level] [output filename] [X] [Y] [Width] [Height]");
 		return 0;
 
 	}
@@ -292,6 +314,10 @@ int main(int argc,char *argv[])
 	iterations = atoi(argv[2]);
 	contrastLevel =atof(argv[3]);
 	char *output_filename = argv[4];
+	new_x = atoi(argv[5]);
+	new_y = atoi(argv[6]);
+	new_width = atoi(argv[7]);
+	new_height = atoi(argv[8]);
 	//printf("%f\n",contrastLevel);
 	decodeImage(input_filename);
 	encodeOneStep(output_filename);
